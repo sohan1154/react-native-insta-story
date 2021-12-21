@@ -1,10 +1,10 @@
-import React, {Fragment, useRef, useState} from "react";
-import {LogBox, Dimensions, View, Platform} from "react-native";
+import React, { Fragment, useRef, useState } from "react";
+import { LogBox, Dimensions, View, Platform } from "react-native";
 import Modal from "react-native-modalbox";
 import StoryListItem from "./StoryListItem";
 import StoryCircleListView from "./StoryCircleListView";
-import {isNullOrWhitespace} from "./helpers/ValidationHelpers";
-import type {IUserStory} from "./interfaces/IUserStory";
+import { isNullOrWhitespace } from "./helpers/ValidationHelpers";
+import type { IUserStory } from "./interfaces/IUserStory";
 import AndroidCubeEffect from "./AndroidCubeEffect";
 import CubeNavigationHorizontal from "./CubeNavigationHorizontal";
 
@@ -18,6 +18,7 @@ type Props = {
     duration?: number,
     swipeText?: string,
     customSwipeUpComponent?: any,
+    customKeyboardPopup?: any,
     customCloseComponent?: any,
     avatarSize?: number,
 };
@@ -35,6 +36,7 @@ export const Story = (props: Props) => {
         duration,
         swipeText,
         customSwipeUpComponent,
+        customKeyboardPopup,
         customCloseComponent,
         avatarSize
     } = props;
@@ -84,23 +86,25 @@ export const Story = (props: Props) => {
     }
 
     const renderStoryList = () => selectedData.map((x, i) => {
-        return (<StoryListItem duration={duration * 1000}
-                               key={i}
-                               profileName={x.user_name}
-                               profileImage={x.user_image}
-                               stories={x.stories}
-                               currentPage={currentPage}
-                               onFinish={onStoryFinish}
-                               swipeText={swipeText}
-                               customSwipeUpComponent={customSwipeUpComponent}
-                               customCloseComponent={customCloseComponent}
-                               onClosePress={() => {
-                                   setIsModalOpen(false);
-                                   if (onClose) {
-                                       onClose(x);
-                                   }
-                               }}
-                               index={i}/>)
+        return (<StoryListItem 
+            duration={duration * 1000}
+            key={i}
+            profileName={x.user_name}
+            profileImage={x.user_image}
+            stories={x.stories}
+            currentPage={currentPage}
+            onFinish={onStoryFinish}
+            swipeText={swipeText}
+            customSwipeUpComponent={customSwipeUpComponent}
+            customKeyboardPopup={customKeyboardPopup}
+            customCloseComponent={customCloseComponent}
+            onClosePress={() => {
+                setIsModalOpen(false);
+                if (onClose) {
+                    onClose(x);
+                }
+            }}
+            index={i} />)
     })
 
     const renderCube = () => {

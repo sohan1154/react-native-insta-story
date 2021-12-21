@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Animated,
     Image,
@@ -8,15 +8,19 @@ import {
     Dimensions,
     TouchableWithoutFeedback,
     ActivityIndicator,
+    KeyboardAvoidingView,
     View,
-    Platform
+    Platform,
+    Keyboard
 } from "react-native";
-import type {IUserStoryItem} from "./interfaces/IUserStory";
-import {usePrevious} from "./helpers/StateHelpers";
-import {isNullOrWhitespace} from "./helpers/ValidationHelpers";
+import Video from 'react-native-video';
+import type { IUserStoryItem } from "./interfaces/IUserStory";
+import { usePrevious } from "./helpers/StateHelpers";
+import { s } from 'react-native-size-matters';
+import { isNullOrWhitespace } from "./helpers/ValidationHelpers";
 import GestureRecognizer from 'react-native-swipe-gestures';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 type Props = {
     profileName: string,
@@ -27,6 +31,7 @@ type Props = {
     key: number,
     swipeText?: string,
     customSwipeUpComponent?: any,
+    customKeyboardPopup?: any,
     customCloseComponent?: any,
     stories: IUserStoryItem[]
 };
@@ -34,12 +39,15 @@ type Props = {
 export const StoryListItem = (props: Props) => {
     const stories = props.stories;
 
+    const [end, setEnd] = useState(0);
     const [load, setLoad] = useState(true);
     const [pressed, setPressed] = useState(false);
+    const [showKeyboard, setShowKeyboard] = useState(false);
     const [content, setContent] = useState(
         stories.map((x) => {
             return {
                 image: x.story_image,
+                type: x.type,
                 onPress: x.onPress,
                 finish: 0
             }
@@ -50,6 +58,8 @@ export const StoryListItem = (props: Props) => {
     const progress = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
+        console.log('props.currentPage:::', props.currentPage)
+
         setCurrent(0);
         if (props.currentPage != 0) {
             let data = [...content];
@@ -67,8 +77,12 @@ export const StoryListItem = (props: Props) => {
         if (!isNullOrWhitespace(prevCurrent)) {
             if (current > prevCurrent && content[current - 1].image == content[current].image) {
                 start();
+                console.log('currentPage:::', props.currentPage)
+
             } else if (current < prevCurrent && content[current + 1].image == content[current].image) {
                 start();
+                console.log('currentPage:::', props.currentPage)
+
             }
         }
 
@@ -81,24 +95,50 @@ export const StoryListItem = (props: Props) => {
     }
 
     function startAnimation() {
-        Animated.timing(progress, {
-            toValue: 1,
-            duration: props.duration,
-            useNativeDriver: false
-        }).start(({finished}) => {
-            if (finished) {
-                next();
+
+        // console.log('content[current]:::::::::',content[current])
+
+        // checking if the data type is video or not
+        if (content[current].type == 'video') {
+            // type videos
+            if (load) {
+                Animated.timing(progress, {
+                    toValue: 1,
+                    duration: 10000, // end,
+                    useNativeDriver: false,
+                }).start(({ finished }) => {
+                    if (finished) {
+                        next();
+                    }
+                });
             }
-        });
+        } else {
+            // type image
+            Animated.timing(progress, {
+                toValue: 1,
+                duration: props.duration,
+                useNativeDriver: false,
+
+            }).start(({ finished }) => {
+                if (finished) {
+                    next();
+                }
+            });
+        }
     }
 
     function onSwipeUp() {
-        if (props.onClosePress) {
-            props.onClosePress();
-        }
-        if (content[current].onPress) {
-            content[current].onPress();
-        }
+        progress.stopAnimation();
+        setPressed(true);
+        setShowKeyboard(true);
+        // console.log('props.customSwipeUpComponent::::::::::',props.customSwipeUpComponent)
+
+        // if (props.onClosePress) {
+        //     props.onClosePress();
+        // }
+        // if (content[current].onPress) {
+        //     content[current].onPress();
+        // }
     }
 
     function onSwipeDown() {
@@ -153,104 +193,148 @@ export const StoryListItem = (props: Props) => {
     }
 
     return (
-        <GestureRecognizer
-            onSwipeUp={(state) => onSwipeUp(state)}
-            onSwipeDown={(state) => onSwipeDown(state)}
-            config={config}
-            style={{
-                flex: 1,
-                backgroundColor: 'black'
-            }}
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.container}
         >
-            <View style={styles.backgroundContainer}>
-                <Image onLoadEnd={() => start()}
-                       source={{uri: content[current].image}}
-                       style={styles.image}
-                />
-                {load && <View style={styles.spinnerContainer}>
-                    <ActivityIndicator size="large" color={'white'}/>
-                </View>}
-            </View>
-            <View style={{flexDirection: 'column', flex: 1,}}>
-                <View style={styles.animationBarContainer}>
-                    {content.map((index, key) => {
-                        return (
-                            <View key={key} style={styles.animationBackground}>
-                                <Animated.View
-                                    style={{
-                                        flex: current == key ? progress : content[key].finish,
-                                        height: 2,
-                                        backgroundColor: 'white',
-                                    }}
-                                />
-                            </View>
-                        );
-                    })}
-                </View>
-                <View style={styles.userContainer}>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                        <Image style={styles.avatarImage}
-                               source={{uri: props.profileImage}}
+
+            <GestureRecognizer
+                onSwipeUp={(state) => onSwipeUp(state)}
+                onSwipeDown={(state) => onSwipeDown(state)}
+                config={config}
+                style={{
+                    flex: 1,
+                    backgroundColor: 'black'
+                }}
+            >
+                <View style={styles.backgroundContainer}>
+
+                    {/* check the data type is video or an image */}
+
+                    {/* { console.log('file-type is:', content[current].type)} */}
+
+                    {content[current].type == 'video' ? (
+                        <>
+                            {/* <Text style={{color: '#fff'}}>{content[current].image}</Text> */}
+                            <Video
+                                source={{
+                                    uri: 'https://boppbucket.s3.us-east-2.amazonaws.com/uploads/test-videos/8.mp4',
+                                }}
+                                // rate={1.0}
+                                // volume={1.0}
+                                resizeMode="cover"
+                                paused={false}
+                                // positionMillis={0}
+                                onReadyForDisplay={() => start()}
+                                // onPlaybackStatusUpdate={AVPlaybackStatus => {
+                                //     console.log(AVPlaybackStatus);
+                                //     setLoad(AVPlaybackStatus.isLoaded);
+                                //     setEnd(AVPlaybackStatus.durationMillis);
+                                // }}
+                                style={{ height: height, width: width }}
+                            />
+                        </>
+                    ) : (
+                        <Image onLoadEnd={() => start()}
+                            source={{ uri: content[current].image }}
+                            style={styles.image}
                         />
-                        <Text style={styles.avatarText}>{props.profileName}</Text>
+                    )}
+
+                    {/* {load && <View style={styles.spinnerContainer}>
+                    <ActivityIndicator size="large" color={'white'} />
+                </View>} */}
+                </View>
+                <View style={{ flexDirection: 'column', flex: 1, }}>
+                    <View style={styles.animationBarContainer}>
+                        {content.map((index, key) => {
+                            return (
+                                <View key={key} style={styles.animationBackground}>
+                                    <Animated.View
+                                        style={{
+                                            flex: current == key ? progress : content[key].finish,
+                                            height: 2,
+                                            backgroundColor: 'white',
+                                        }}
+                                    />
+                                </View>
+                            );
+                        })}
                     </View>
-                    <TouchableOpacity onPress={() => {
-                        if (props.onClosePress) {
-                            props.onClosePress();
-                        }
-                    }}>
-                        <View style={styles.closeIconContainer}>
-                            {props.customCloseComponent ?
-                                props.customCloseComponent :
-                                <Text style={{color: 'white'}}>X</Text>
-                            }
+                    <View style={styles.userContainer}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Image style={styles.avatarImage}
+                                source={{ uri: props.profileImage }}
+                            />
+                            <Text style={styles.avatarText}>{props.profileName}</Text>
                         </View>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.pressContainer}>
-                    <TouchableWithoutFeedback
-                        onPressIn={() => progress.stopAnimation()}
-                        onLongPress={() => setPressed(true)}
-                        onPressOut={() => {
-                            setPressed(false);
-                            startAnimation();
-                        }}
-                        onPress={() => {
-                            if (!pressed && !load) {
-                                previous()
+                        <TouchableOpacity onPress={() => {
+                            if (props.onClosePress) {
+                                props.onClosePress();
                             }
-                        }}
-                    >
-                        <View style={{flex: 1}}/>
-                    </TouchableWithoutFeedback>
-                    <TouchableWithoutFeedback onPressIn={() => progress.stopAnimation()}
-                                              onLongPress={() => setPressed(true)}
-                                              onPressOut={() => {
-                                                  setPressed(false);
-                                                  startAnimation();
-                                              }}
-                                              onPress={() => {
-                                                  if (!pressed && !load) {
-                                                      next()
-                                                  }
-                                              }}>
-                        <View style={{flex: 1}}/>
-                    </TouchableWithoutFeedback>
+                        }}>
+                            <View style={styles.closeIconContainer}>
+                                {props.customCloseComponent ?
+                                    props.customCloseComponent :
+                                    <Text style={{ color: 'white' }}>X</Text>
+                                }
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.pressContainer}>
+                        <TouchableWithoutFeedback
+                            onPressIn={() => progress.stopAnimation()}
+                            onLongPress={() => setPressed(true)}
+                            onPressOut={() => {
+                                setPressed(false);
+                                startAnimation();
+                                Keyboard.dismiss();
+                                setShowKeyboard(false)
+                            }}
+                            onPress={() => {
+                                if (!pressed && !load) {
+                                    previous()
+                                }
+
+                            }}
+                        >
+                            <View style={{ flex: 1 }} />
+                        </TouchableWithoutFeedback>
+                        <TouchableWithoutFeedback onPressIn={() => progress.stopAnimation()}
+                            onLongPress={() => setPressed(true)}
+                            onPressOut={() => {
+                                setPressed(false);
+                                startAnimation();
+                                Keyboard.dismiss()
+                                setShowKeyboard(false)
+                            }}
+                            onPress={() => {
+                                if (!pressed && !load) {
+                                    next()
+                                }
+
+                            }}>
+                            <View style={{ flex: 1 }} />
+                        </TouchableWithoutFeedback>
+                    </View>
                 </View>
-            </View>
-            {content[current].onPress &&
-            <TouchableOpacity activeOpacity={1}
-                              onPress={onSwipeUp}
-                              style={styles.swipeUpBtn}>
-                {props.customSwipeUpComponent ?
-                    props.customSwipeUpComponent :
-                    <>
-                        <Text style={{color: 'white', marginTop: 5}}></Text>
-                        <Text style={{color: 'white', marginTop: 5}}>{props.swipeText ?? 'Swipe Up'}</Text>
-                    </>
-                }
-            </TouchableOpacity>}
-        </GestureRecognizer>
+                {content[current].onPress &&
+                    <TouchableOpacity activeOpacity={1}
+                        onPress={onSwipeUp}
+                        style={styles.swipeUpBtn}
+                    >
+                        {showKeyboard && props.customSwipeUpComponent ?
+                            props.customSwipeUpComponent :
+
+                            <View style={{ marginTop: s(15) }}>
+                                <Text style={styles.replyText}>^</Text>
+                                <Text style={styles.replyText}>Reply</Text>
+                            </View>
+
+                        }
+                    </TouchableOpacity>}
+            </GestureRecognizer>
+        </KeyboardAvoidingView>
     )
 }
 
@@ -327,9 +411,19 @@ const styles = StyleSheet.create({
     },
     swipeUpBtn: {
         position: 'absolute',
-        right: 0,
-        left: 0,
+        // right: s(50),
+        // left: s(50),
         alignItems: 'center',
+        alignSelf: 'center',
+        height: '10%',
+        width: s(100),
+        // backgroundColor:'red',
         bottom: Platform.OS == 'ios' ? 20 : 50
-    }
+    },
+    replyText: {
+        alignSelf: 'center',
+        color: '#FFF',
+        fontSize: s(12)
+    },
+
 });
