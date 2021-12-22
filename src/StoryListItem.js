@@ -264,7 +264,7 @@ export const StoryListItem = (props: Props) => {
                     <View style={styles.userContainer}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Image style={styles.avatarImage}
-                                source={{ uri: props.profileImage }}
+                                source={props.profileImage}
                             />
                             <Text style={styles.avatarText}>{props.profileName}</Text>
                         </View>
@@ -292,6 +292,8 @@ export const StoryListItem = (props: Props) => {
                                 setShowKeyboard(false)
                             }}
                             onPress={() => {
+                                console.log('onPresssssssss')
+
                                 if (!pressed && !load) {
                                     previous()
                                 }
@@ -302,39 +304,40 @@ export const StoryListItem = (props: Props) => {
                         </TouchableWithoutFeedback>
                         <TouchableWithoutFeedback onPressIn={() => progress.stopAnimation()}
                             onLongPress={() => setPressed(true)}
-                            onPressOut={() => {
-                                setPressed(false);
-                                startAnimation();
-                                Keyboard.dismiss()
-                                setShowKeyboard(false)
-                            }}
-                            onPress={() => {
-                                if (!pressed && !load) {
-                                    next()
-                                }
+                        onPressOut={() => {
+                            setPressed(false);
+                            startAnimation();
+                            Keyboard.dismiss();
+                            setShowKeyboard(false)
+                        }}
+                        onPress={() => {
+                            console.log('onPresssssssss')
+                            if (!pressed && !load) {
+                                next()
+                            }
 
-                            }}>
-                            <View style={{ flex: 1 }} />
-                        </TouchableWithoutFeedback>
-                    </View>
+                        }}>
+                        <View style={{ flex: 1 }} />
+                    </TouchableWithoutFeedback>
                 </View>
-                {content[current].onPress &&
-                    <TouchableOpacity activeOpacity={1}
-                        onPress={onSwipeUp}
-                        style={styles.swipeUpBtn}
-                    >
-                        {showKeyboard && props.customSwipeUpComponent ?
-                            props.customSwipeUpComponent :
+            </View>
+            {content[current].onPress &&
+                <TouchableOpacity activeOpacity={1}
+                    onPress={onSwipeUp}
+                    style={styles.swipeUpBtn}
+                >
+                    {showKeyboard && props.customSwipeUpComponent ?
+                        props.customSwipeUpComponent :
 
-                            <View style={{ marginTop: s(15) }}>
-                                <Text style={styles.replyText}>^</Text>
-                                <Text style={styles.replyText}>Reply</Text>
-                            </View>
+                        <View style={{ marginTop: s(15) }}>
+                            <Text style={styles.replyText}>^</Text>
+                            <Text style={styles.replyText}>Reply</Text>
+                        </View>
 
-                        }
-                    </TouchableOpacity>}
-            </GestureRecognizer>
-        </KeyboardAvoidingView>
+                    }
+                </TouchableOpacity>}
+        </GestureRecognizer>
+        </KeyboardAvoidingView >
     )
 }
 

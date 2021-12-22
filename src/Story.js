@@ -1,5 +1,6 @@
 import React, { Fragment, useRef, useState } from "react";
 import { LogBox, Dimensions, View, Platform } from "react-native";
+import { s, vs, ms, mvs } from 'react-native-size-matters';
 import Modal from "react-native-modalbox";
 import StoryListItem from "./StoryListItem";
 import StoryCircleListView from "./StoryCircleListView";
@@ -141,8 +142,8 @@ export const Story = (props: Props) => {
                 <StoryCircleListView
                     handleStoryItemPress={_handleStoryItemPress}
                     data={data}
-                    avatarSize={avatarSize}
-                    unPressedBorderColor={unPressedBorderColor}
+                    avatarSize={s(50)}
+                    // unPressedBorderColor='#FFF'
                     pressedBorderColor={pressedBorderColor}
                 />
             </View>

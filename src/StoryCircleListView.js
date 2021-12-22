@@ -30,6 +30,7 @@ class StoryCircleListView extends Component {
                     renderItem={({item, index}) => (
                         <StoryCircleListItem
                             avatarSize={avatarSize}
+                            index={index}
                             handleStoryItemPress={() =>
                                 handleStoryItemPress && handleStoryItemPress(item, index)
                             }

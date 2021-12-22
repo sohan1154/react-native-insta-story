@@ -1,5 +1,8 @@
-import React, {Component} from "react";
-import {View, Image, TouchableOpacity, Text, StyleSheet, Platform} from "react-native";
+import React, { Component } from "react";
+import { View, Image, TouchableOpacity, Text, StyleSheet, Platform } from "react-native";
+import LinearGradient from 'react-native-linear-gradient';
+import { s, vs, ms, mvs } from 'react-native-size-matters';
+
 
 // Constants
 import DEFAULT_AVATAR from "./assets/images/no_avatar.png";
@@ -15,55 +18,96 @@ class StoryCircleListItem extends Component {
 
     // Component Functions
     _handleItemPress = item => {
-        const {handleStoryItemPress} = this.props;
+        const { handleStoryItemPress } = this.props;
 
         if (handleStoryItemPress) handleStoryItemPress(item);
 
-        this.setState({isPressed: true});
+        this.setState({ isPressed: true });
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.item.seen != this.props.item.seen) {
-            this.setState({isPressed: this.props.item.seen});
+            this.setState({ isPressed: this.props.item.seen });
         }
     }
 
     render() {
-        const {item, unPressedBorderColor, pressedBorderColor, avatarSize} = this.props;
-        const {isPressed} = this.state;
+        console.log('item:::::::::::::', this.props.item)
+        console.log('index:::::::::::::', this.props.index)
+        const { item, unPressedBorderColor, pressedBorderColor, avatarSize } = this.props;
+        const { isPressed } = this.state;
         return (
             <View style={styles.container}>
-                <TouchableOpacity
-                    onPress={() => this._handleItemPress(item)}
-                    style={[
-                        styles.avatarWrapper,
-                        {
-                            height: avatarSize ? avatarSize + 4 : 64,
-                            width: avatarSize ? avatarSize + 4 : 64,
-                        },
-                        !isPressed
-                            ? {
-                                borderColor: unPressedBorderColor
-                                    ? unPressedBorderColor
-                                    : 'red'
+
+                {!this.props.index &&
+                    <>
+                        <TouchableOpacity style={styles.userStoryStyle} onPress={() => item.onPress()}>
+                            <Image source={item.storyImage} style={styles.userStoryImage} />
+                        </TouchableOpacity>
+                        <Text style={{ color: '#FFF', alignSelf: 'center' }}>{item.user_name.length < 10 ? item.user_name : item.user_name.slice(0, 7) + '...'}</Text>
+
+                    </>
+                }
+
+                {this.props.index > 0 &&
+                    <>
+                        <TouchableOpacity
+                            onPress={() => this._handleItemPress(item)}
+                            style={[
+                                styles.avatarWrapper,
+                                {
+                                    height: avatarSize ? avatarSize + 4 : 64,
+                                    width: avatarSize ? avatarSize + 4 : 64,
+                                },
+                                !isPressed
+                                    ? {
+                                        borderColor: unPressedBorderColor
+                                            ? unPressedBorderColor
+                                            : 'red'
+                                    }
+                                    : {
+                                        borderColor: pressedBorderColor
+                                            ? pressedBorderColor
+                                            : 'grey'
+                                    }
+                            ]}
+                        >
+                            {!isPressed ?
+                                <LinearGradient
+                                    colors={['#feda75', '#fa7e1e', '#d62976', '#962fbf', '#4f5bd5']}
+                                    style={{
+                                        alignItems: 'center',
+                                        padding: 3,
+                                        borderRadius: 100
+                                    }}
+                                    start={{ x: 0, y: 1 }}
+                                    end={{ x: 1, y: 0 }}
+                                >
+                                    <Image
+                                        style={{
+                                            height: avatarSize ?? 60,
+                                            width: avatarSize ?? 60,
+                                            borderRadius: 100,
+                                        }}
+                                        source={item.user_image}
+                                        defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
+                                    />
+                                </LinearGradient>
+                                :
+                                <Image
+                                    style={{
+                                        height: avatarSize ?? 60,
+                                        width: avatarSize ?? 60,
+                                        borderRadius: 100,
+                                    }}
+                                    source={item.user_image}
+                                    defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
+                                />
                             }
-                            : {
-                                borderColor: pressedBorderColor
-                                    ? pressedBorderColor
-                                    : 'grey'
-                            }
-                    ]}
-                >
-                    <Image
-                        style={{
-                            height: avatarSize ?? 60,
-                            width: avatarSize ?? 60,
-                            borderRadius: 100,
-                        }}
-                        source={{uri: item.user_image}}
-                        defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
-                    />
-                </TouchableOpacity>
+                        </TouchableOpacity>
+                        <Text style={{ color: '#FFF', alignSelf: 'center' }}>{item.user_name.length < 10 ? item.user_name : item.user_name.slice(0, 7) + '...'}</Text>
+                    </>
+                }
             </View>
         );
     }
@@ -100,5 +144,11 @@ const
         itemText: {
             textAlign: "center",
             fontSize: 9
-        }
+        },
+        userStoryImage: {
+            alignSelf: 'center',
+            borderRadius: s(100),
+            height: s(51),
+            width: s(51),
+        },
     });
