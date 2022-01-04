@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { View, Image, TouchableOpacity, Text, StyleSheet, Platform } from "react-native";
+import React, { Component,useState, useEffect } from "react";
+import { View, Image, TouchableOpacity, Text, StyleSheet, Platform ,useColorScheme} from "react-native";
 import LinearGradient from 'react-native-linear-gradient';
 import { s, vs, ms, mvs } from 'react-native-size-matters';
 
@@ -8,51 +8,39 @@ import { s, vs, ms, mvs } from 'react-native-size-matters';
 import DEFAULT_AVATAR from "./assets/images/no_avatar.png";
 
 // Components
-class StoryCircleListItem extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            isPressed: this.props?.item?.seen
-        };
-    }
+
+function StoryCircleListItem(props) {
+
+    const [isPressed, setIsPressed] = useState(false)
+    const { item, unPressedBorderColor, pressedBorderColor, avatarSize } = props;
+     let fontColor = (useColorScheme() === 'dark') ? '#FFF' : '#000'
 
     // Component Functions
     _handleItemPress = item => {
-        const { handleStoryItemPress } = this.props;
+        const { handleStoryItemPress } = props;
 
         if (handleStoryItemPress) handleStoryItemPress(item);
 
-        this.setState({ isPressed: true });
+        setIsPressed(true);
     };
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.item.seen != this.props.item.seen) {
-            this.setState({ isPressed: this.props.item.seen });
-        }
-    }
-
-    render() {
-        console.log('item:::::::::::::', this.props.item)
-        console.log('index:::::::::::::', this.props.index)
-        const { item, unPressedBorderColor, pressedBorderColor, avatarSize, theme } = this.props;
-        const { isPressed } = this.state;
+    
         return (
             <View style={styles.container}>
 
-                {!this.props.index &&
+                {!props.index &&
                     <>
                         <TouchableOpacity style={styles.userStoryStyle} onPress={() => item.onPress()}>
                             <Image source={item.storyImage} style={styles.userStoryImage} />
                         </TouchableOpacity>
-                        <Text style={{ color: (theme==='dark') ? '#FFF' : '#000', alignSelf: 'center' }}>{item.user_name.length < 10 ? item.user_name : item.user_name.slice(0, 7) + '...'}</Text>
+                        <Text style={{ color: fontColor, alignSelf: 'center' }}>{item.user_name.length < 10 ? item.user_name : item.user_name.slice(0, 7) + '...'}</Text>
 
                     </>
                 }
 
-                {this.props.index > 0 &&
+                {props.index > 0 &&
                     <>
                         <TouchableOpacity
-                            onPress={() => this._handleItemPress(item)}
+                            onPress={() => _handleItemPress(item)}
                             style={[
                                 styles.avatarWrapper,
                                 {
@@ -89,7 +77,7 @@ class StoryCircleListItem extends Component {
                                             width: avatarSize ?? 60,
                                             borderRadius: 100,
                                         }}
-                                        source={{ uri: item.user_image}}
+                                        source={{uri : item.user_image}}
                                         defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
                                     />
                                 </LinearGradient>
@@ -100,17 +88,17 @@ class StoryCircleListItem extends Component {
                                         width: avatarSize ?? 60,
                                         borderRadius: 100,
                                     }}
-                                    source={{ uri: item.user_image}}
+                                    source={{uri : item.user_image}}
                                     defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
                                 />
                             }
                         </TouchableOpacity>
-                        <Text style={{ color: (theme==='dark') ? '#FFF' : '#000', alignSelf: 'center' }}>{item.user_name.length < 10 ? item.user_name : item.user_name.slice(0, 7) + '...'}</Text>
+                        <Text style={{ color: fontColor, alignSelf: 'center' }}>{item.user_name.length < 10 ? item.user_name : item.user_name.slice(0, 7) + '...'}</Text>
                     </>
                 }
             </View>
         );
-    }
+   
 }
 
 export default StoryCircleListItem;

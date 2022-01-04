@@ -17,6 +17,7 @@ type Props = {
     onClose?: function,
     onStart?: function,
     duration?: number,
+    theme?: string,
     swipeText?: string,
     customSwipeUpComponent?: any,
     customKeyboardPopup?: any,
@@ -35,6 +36,7 @@ export const Story = (props: Props) => {
         onStart,
         onClose,
         duration,
+        theme,
         swipeText,
         customSwipeUpComponent,
         customKeyboardPopup,
@@ -89,6 +91,7 @@ export const Story = (props: Props) => {
     const renderStoryList = () => selectedData.map((x, i) => {
         return (<StoryListItem 
             duration={duration * 1000}
+            theme={theme}
             key={i}
             profileName={x.user_name}
             profileImage={x.user_image}
@@ -142,6 +145,7 @@ export const Story = (props: Props) => {
                 <StoryCircleListView
                     handleStoryItemPress={_handleStoryItemPress}
                     data={data}
+                    theme={theme}
                     avatarSize={s(50)}
                     // unPressedBorderColor='#FFF'
                     pressedBorderColor={pressedBorderColor}

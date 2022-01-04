@@ -19,6 +19,7 @@ import { usePrevious } from "./helpers/StateHelpers";
 import { s } from 'react-native-size-matters';
 import { isNullOrWhitespace } from "./helpers/ValidationHelpers";
 import GestureRecognizer from 'react-native-swipe-gestures';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const { width, height } = Dimensions.get('window');
 
@@ -131,14 +132,6 @@ export const StoryListItem = (props: Props) => {
         progress.stopAnimation();
         setPressed(true);
         setShowKeyboard(true);
-        // console.log('props.customSwipeUpComponent::::::::::',props.customSwipeUpComponent)
-
-        // if (props.onClosePress) {
-        //     props.onClosePress();
-        // }
-        // if (content[current].onPress) {
-        //     content[current].onPress();
-        // }
     }
 
     function onSwipeDown() {
@@ -207,6 +200,12 @@ export const StoryListItem = (props: Props) => {
                     backgroundColor: 'black'
                 }}
             >
+                {/* <ScrollView
+                        scrollEnabled={false}
+                        keyboardShouldPersistTaps='always'
+                        keyboardDismissMode='on-drag'
+                        style={styles.container}
+                    > */}
                 <View style={styles.backgroundContainer}>
 
                     {/* check the data type is video or an image */}
@@ -235,10 +234,11 @@ export const StoryListItem = (props: Props) => {
                             />
                         </>
                     ) : (
-                        <Image onLoadEnd={() => start()}
-                            source={{ uri: content[current].image }}
-                            style={styles.image}
-                        />
+                        
+                            <Image onLoadEnd={() => start()}
+                                source={{ uri: content[current].image }}
+                                style={styles.image}
+                            />
                     )}
 
                     {/* {load && <View style={styles.spinnerContainer}>
@@ -264,7 +264,7 @@ export const StoryListItem = (props: Props) => {
                     <View style={styles.userContainer}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Image style={styles.avatarImage}
-                                source={props.profileImage}
+                                source={{ uri: props.profileImage }}
                             />
                             <Text style={styles.avatarText}>{props.profileName}</Text>
                         </View>
@@ -281,6 +281,7 @@ export const StoryListItem = (props: Props) => {
                             </View>
                         </TouchableOpacity>
                     </View>
+                   
                     <View style={styles.pressContainer}>
                         <TouchableWithoutFeedback
                             onPressIn={() => progress.stopAnimation()}
@@ -288,7 +289,6 @@ export const StoryListItem = (props: Props) => {
                             onPressOut={() => {
                                 setPressed(false);
                                 startAnimation();
-                                Keyboard.dismiss();
                                 setShowKeyboard(false)
                             }}
                             onPress={() => {
@@ -304,24 +304,24 @@ export const StoryListItem = (props: Props) => {
                         </TouchableWithoutFeedback>
                         <TouchableWithoutFeedback onPressIn={() => progress.stopAnimation()}
                             onLongPress={() => setPressed(true)}
-                        onPressOut={() => {
-                            setPressed(false);
-                            startAnimation();
-                            Keyboard.dismiss();
-                            setShowKeyboard(false)
-                        }}
-                        onPress={() => {
-                            console.log('onPresssssssss')
-                            if (!pressed && !load) {
-                                next()
-                            }
+                            onPressOut={() => {
+                                setPressed(false);
+                                startAnimation();
+                                setShowKeyboard(false)
+                            }}
+                            onPress={() => {
+                                console.log('onPresssssssss')
+                                if (!pressed && !load) {
+                                    next()
+                                }
 
-                        }}>
-                        <View style={{ flex: 1 }} />
-                    </TouchableWithoutFeedback>
+                            }}>
+                            <View style={{ flex: 1 }} />
+                        </TouchableWithoutFeedback>
+                    </View>
+
                 </View>
-            </View>
-            {content[current].onPress &&
+                {/* {content[current].onPress && */}
                 <TouchableOpacity activeOpacity={1}
                     onPress={onSwipeUp}
                     style={styles.swipeUpBtn}
@@ -335,8 +335,10 @@ export const StoryListItem = (props: Props) => {
                         </View>
 
                     }
-                </TouchableOpacity>}
-        </GestureRecognizer>
+                </TouchableOpacity>
+                {/* } */}
+                {/* </ScrollView> */}
+            </GestureRecognizer>
         </KeyboardAvoidingView >
     )
 }
