@@ -43,7 +43,7 @@ export const StoryListItem = (props: Props) => {
     const [end, setEnd] = useState(0);
     const [load, setLoad] = useState(true);
     const [pressed, setPressed] = useState(false);
-    const [showKeyboard, setShowKeyboard] = useState(false);
+    const [showInputBox, setShowInputBox] = useState(false);
     const [content, setContent] = useState(
         stories.map((x) => {
             return {
@@ -55,6 +55,8 @@ export const StoryListItem = (props: Props) => {
         }));
 
     const [current, setCurrent] = useState(0);
+
+    const prevCurrent = usePrevious(current);
 
     const progress = useRef(new Animated.Value(0)).current;
 
@@ -72,7 +74,22 @@ export const StoryListItem = (props: Props) => {
         }
     }, [props.currentPage]);
 
-    const prevCurrent = usePrevious(current);
+
+    useEffect(() => {
+       
+        const hideKeyboard = Keyboard.addListener("keyboardDidHide", () => {
+            // setKeyboardStatus("false");
+            setShowInputBox(false);
+            setPressed(false);
+            startAnimation();
+        });
+
+        return () => {
+            hideKeyboard.remove();
+        };
+    }, [showInputBox]);
+
+
 
     useEffect(() => {
         if (!isNullOrWhitespace(prevCurrent)) {
@@ -131,7 +148,7 @@ export const StoryListItem = (props: Props) => {
     function onSwipeUp() {
         progress.stopAnimation();
         setPressed(true);
-        setShowKeyboard(true);
+        setShowInputBox(true);
     }
 
     function onSwipeDown() {
@@ -186,6 +203,7 @@ export const StoryListItem = (props: Props) => {
     }
 
     return (
+
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.container}
@@ -197,15 +215,10 @@ export const StoryListItem = (props: Props) => {
                 config={config}
                 style={{
                     flex: 1,
-                    backgroundColor: 'black'
+                    backgroundColor: 'red'
                 }}
             >
-                {/* <ScrollView
-                        scrollEnabled={false}
-                        keyboardShouldPersistTaps='always'
-                        keyboardDismissMode='on-drag'
-                        style={styles.container}
-                    > */}
+
                 <View style={styles.backgroundContainer}>
 
                     {/* check the data type is video or an image */}
@@ -234,11 +247,11 @@ export const StoryListItem = (props: Props) => {
                             />
                         </>
                     ) : (
-                        
-                            <Image onLoadEnd={() => start()}
-                                source={{ uri: content[current].image }}
-                                style={styles.image}
-                            />
+
+                        <Image onLoadEnd={() => start()}
+                            source={{ uri: content[current].image }}
+                            style={styles.image}
+                        />
                     )}
 
                     {/* {load && <View style={styles.spinnerContainer}>
@@ -281,15 +294,16 @@ export const StoryListItem = (props: Props) => {
                             </View>
                         </TouchableOpacity>
                     </View>
-                   
+
                     <View style={styles.pressContainer}>
+
                         <TouchableWithoutFeedback
                             onPressIn={() => progress.stopAnimation()}
                             onLongPress={() => setPressed(true)}
                             onPressOut={() => {
                                 setPressed(false);
                                 startAnimation();
-                                setShowKeyboard(false)
+                                // setShowInputBox(false)
                             }}
                             onPress={() => {
                                 console.log('onPresssssssss')
@@ -307,7 +321,7 @@ export const StoryListItem = (props: Props) => {
                             onPressOut={() => {
                                 setPressed(false);
                                 startAnimation();
-                                setShowKeyboard(false)
+                                // setShowInputBox(false)
                             }}
                             onPress={() => {
                                 console.log('onPresssssssss')
@@ -326,7 +340,7 @@ export const StoryListItem = (props: Props) => {
                     onPress={onSwipeUp}
                     style={styles.swipeUpBtn}
                 >
-                    {showKeyboard && props.customSwipeUpComponent ?
+                    {showInputBox && props.customSwipeUpComponent ?
                         props.customSwipeUpComponent :
 
                         <View style={{ marginTop: s(15) }}>
@@ -337,7 +351,6 @@ export const StoryListItem = (props: Props) => {
                     }
                 </TouchableOpacity>
                 {/* } */}
-                {/* </ScrollView> */}
             </GestureRecognizer>
         </KeyboardAvoidingView >
     )
@@ -412,7 +425,7 @@ const styles = StyleSheet.create({
     },
     pressContainer: {
         flex: 1,
-        flexDirection: 'row'
+        flexDirection: 'row',
     },
     swipeUpBtn: {
         position: 'absolute',
