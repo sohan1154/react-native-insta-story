@@ -20,6 +20,7 @@ import { s } from 'react-native-size-matters';
 import { isNullOrWhitespace } from "./helpers/ValidationHelpers";
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { ScrollView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
@@ -229,10 +230,10 @@ export const StoryListItem = (props: Props) => {
                 config={config}
                 style={{
                     flex: 1,
-                    backgroundColor: 'red'
+                    // backgroundColor: 'red'
                 }}
             >
-
+                <SafeAreaView>
                 <View style={styles.backgroundContainer}>
 
                     {/* check the data type is video or an image */}
@@ -360,7 +361,7 @@ export const StoryListItem = (props: Props) => {
 
                     }
                 </TouchableOpacity>
-                {/* } */}
+                </SafeAreaView>
             </GestureRecognizer>
         </KeyboardAvoidingView >
     )
