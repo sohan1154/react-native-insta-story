@@ -32,8 +32,8 @@ class StoryCircleListItem extends Component {
     }
 
     render() {
-        console.log('item:::::::::::::', this.props.item)
-        console.log('index:::::::::::::', this.props.index)
+        // console.log('item:::::::::::::', this.props.item)
+        // console.log('index:::::::::::::', this.props.index)
         const { item, unPressedBorderColor, pressedBorderColor, avatarSize, theme } = this.props;
         const { isPressed } = this.state;
         return (
