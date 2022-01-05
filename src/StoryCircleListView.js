@@ -25,6 +25,8 @@ class StoryCircleListView extends Component {
                     data={data}
                     horizontal
                     style={{paddingLeft: 12}}
+                    keyboardShouldPersistTaps='never'
+                    keyboardDismissMode="none"
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
                     ListFooterComponent={<View style={{flex: 1, width: 8}}/>}

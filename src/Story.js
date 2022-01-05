@@ -16,10 +16,12 @@ type Props = {
     pressedBorderColor?: string,
     onClose?: function,
     onStart?: function,
+    resetIsInputBox?: function,
     duration?: number,
     theme?: string,
     swipeText?: string,
     customSwipeUpComponent?: any,
+    inputBox?:string,
     customKeyboardPopup?: any,
     customCloseComponent?: any,
     avatarSize?: number,
@@ -34,11 +36,13 @@ export const Story = (props: Props) => {
         pressedBorderColor,
         style,
         onStart,
+        resetIsInputBox,
         onClose,
         duration,
         theme,
         swipeText,
         customSwipeUpComponent,
+        isInputBox,
         customKeyboardPopup,
         customCloseComponent,
         avatarSize
@@ -100,6 +104,8 @@ export const Story = (props: Props) => {
             onFinish={onStoryFinish}
             swipeText={swipeText}
             customSwipeUpComponent={customSwipeUpComponent}
+            resetIsInputBox={resetIsInputBox}
+            isInputBox={isInputBox}
             customKeyboardPopup={customKeyboardPopup}
             customCloseComponent={customCloseComponent}
             onClosePress={() => {

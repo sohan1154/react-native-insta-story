@@ -28,10 +28,12 @@ type Props = {
     profileImage: string,
     duration?: number,
     onFinish?: function,
+    resetIsInputBox?: function,
     onClosePress: function,
     key: number,
     swipeText?: string,
     customSwipeUpComponent?: any,
+    isInputBox: string,
     customKeyboardPopup?: any,
     customCloseComponent?: any,
     stories: IUserStoryItem[]
@@ -74,21 +76,14 @@ export const StoryListItem = (props: Props) => {
         }
     }, [props.currentPage]);
 
-
     useEffect(() => {
-       
-        const hideKeyboard = Keyboard.addListener("keyboardDidHide", () => {
-            // setKeyboardStatus("false");
-            setShowInputBox(false);
-            setPressed(false);
-            startAnimation();
-        });
 
-        return () => {
-            hideKeyboard.remove();
-        };
-    }, [showInputBox]);
-
+        if(props.isInputBox === true)
+        {
+            resumeAnimationOnSubmit()
+        }
+        
+    }, [props.isInputBox])
 
 
     useEffect(() => {
@@ -202,6 +197,25 @@ export const StoryListItem = (props: Props) => {
         }
     }
 
+    const resumeAnimation = () => {
+        
+        setPressed(false);
+        startAnimation();
+        setShowInputBox(false);
+        Keyboard.dismiss()
+    }
+
+    const resumeAnimationOnSubmit = () => {
+
+        if (props.isInputBox) {
+            props.resetIsInputBox(props.isInputBox)
+        }
+        setPressed(false);
+        startAnimation();
+        setShowInputBox(false);
+        Keyboard.dismiss()
+    }
+
     return (
 
         <KeyboardAvoidingView
@@ -258,7 +272,9 @@ export const StoryListItem = (props: Props) => {
                     <ActivityIndicator size="large" color={'white'} />
                 </View>} */}
                 </View>
+
                 <View style={{ flexDirection: 'column', flex: 1, }}>
+
                     <View style={styles.animationBarContainer}>
                         {content.map((index, key) => {
                             return (
@@ -301,13 +317,10 @@ export const StoryListItem = (props: Props) => {
                             onPressIn={() => progress.stopAnimation()}
                             onLongPress={() => setPressed(true)}
                             onPressOut={() => {
-                                setPressed(false);
-                                startAnimation();
-                                // setShowInputBox(false)
+                                resumeAnimation()
                             }}
                             onPress={() => {
                                 console.log('onPresssssssss')
-
                                 if (!pressed && !load) {
                                     previous()
                                 }
@@ -319,9 +332,7 @@ export const StoryListItem = (props: Props) => {
                         <TouchableWithoutFeedback onPressIn={() => progress.stopAnimation()}
                             onLongPress={() => setPressed(true)}
                             onPressOut={() => {
-                                setPressed(false);
-                                startAnimation();
-                                // setShowInputBox(false)
+                                resumeAnimation()
                             }}
                             onPress={() => {
                                 console.log('onPresssssssss')
@@ -333,9 +344,8 @@ export const StoryListItem = (props: Props) => {
                             <View style={{ flex: 1 }} />
                         </TouchableWithoutFeedback>
                     </View>
-
                 </View>
-                {/* {content[current].onPress && */}
+
                 <TouchableOpacity activeOpacity={1}
                     onPress={onSwipeUp}
                     style={styles.swipeUpBtn}
@@ -429,13 +439,10 @@ const styles = StyleSheet.create({
     },
     swipeUpBtn: {
         position: 'absolute',
-        // right: s(50),
-        // left: s(50),
         alignItems: 'center',
         alignSelf: 'center',
         height: '10%',
         width: s(100),
-        // backgroundColor:'red',
         bottom: Platform.OS == 'ios' ? 20 : 50
     },
     replyText: {
