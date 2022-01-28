@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState } from "react";
+import React, { Fragment, useRef, useState, useEffect } from "react";
 import { LogBox, Dimensions, View, Platform } from "react-native";
 import { s, vs, ms, mvs } from 'react-native-size-matters';
 import Modal from "react-native-modalbox";
@@ -21,7 +21,7 @@ type Props = {
     theme?: string,
     swipeText?: string,
     customSwipeUpComponent?: any,
-    inputBox?:string,
+    inputBox?: string,
     customKeyboardPopup?: any,
     customCloseComponent?: any,
     avatarSize?: number,
@@ -51,6 +51,8 @@ export const Story = (props: Props) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [selectedData, setSelectedData] = useState([]);
+    const [storyIndex, setStoryIndex] = useState(null);
+    const [storySeen, setStorySeen] = useState(false);
     const cube = useRef();
 
     // Component Functions
@@ -59,7 +61,7 @@ export const Story = (props: Props) => {
         if (onStart) {
             onStart(item)
         }
-
+        // setStoryIndex(index)
         setCurrentPage(0);
         setSelectedData(newData);
         setIsModalOpen(true);
@@ -71,16 +73,18 @@ export const Story = (props: Props) => {
                 const newPage = currentPage + 1;
                 if (newPage < selectedData.length) {
                     setCurrentPage(newPage);
+                    setStorySeen(true)
                     cube?.current?.scrollTo(newPage);
                 } else {
                     setIsModalOpen(false);
+                    setStorySeen(true)
                     setCurrentPage(0);
                     if (onClose) {
                         onClose(selectedData[selectedData.length - 1]);
                     }
                 }
             } else if (state == "previous") {
-                const newPage = currentPage - 1;
+
                 if (newPage < 0) {
                     setIsModalOpen(false);
                     setCurrentPage(0);
@@ -93,7 +97,7 @@ export const Story = (props: Props) => {
     }
 
     const renderStoryList = () => selectedData.map((x, i) => {
-        return (<StoryListItem 
+        return (<StoryListItem
             duration={duration * 1000}
             theme={theme}
             key={i}
@@ -151,6 +155,7 @@ export const Story = (props: Props) => {
                 <StoryCircleListView
                     handleStoryItemPress={_handleStoryItemPress}
                     data={data}
+                    storySeen={storySeen}
                     theme={theme}
                     avatarSize={s(50)}
                     // unPressedBorderColor='#FFF'

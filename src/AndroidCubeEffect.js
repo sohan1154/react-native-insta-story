@@ -191,6 +191,8 @@ export default class AndroidCubeEffect extends React.Component {
     };
 
     _renderChild = (child, i) => {
+        console.log(' i:::::::::',i)
+        console.log(' child:::::::::',child)
         let expandStyle = this.props.expandView
             ? {paddingTop: 100, paddingBottom: 100, height: height + 200}
             : {width, height};

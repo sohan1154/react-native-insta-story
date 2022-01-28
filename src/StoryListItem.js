@@ -17,10 +17,10 @@ import Video from 'react-native-video';
 import type { IUserStoryItem } from "./interfaces/IUserStory";
 import { usePrevious } from "./helpers/StateHelpers";
 import { s } from 'react-native-size-matters';
+import Icon from 'react-native-vector-icons/AntDesign';
 import { isNullOrWhitespace } from "./helpers/ValidationHelpers";
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { ScrollView } from 'react-native-gesture-handler';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
@@ -64,7 +64,8 @@ export const StoryListItem = (props: Props) => {
     const progress = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        console.log('props.currentPage:::', props.currentPage)
+        // console.log('props.currentPage:::', props.currentPage)
+        // console.log('content::::::::::::::', content[0])
 
         setCurrent(0);
         if (props.currentPage != 0) {
@@ -233,7 +234,6 @@ export const StoryListItem = (props: Props) => {
                     // backgroundColor: 'red'
                 }}
             >
-                <SafeAreaView>
                 <View style={styles.backgroundContainer}>
 
                     {/* check the data type is video or an image */}
@@ -269,9 +269,9 @@ export const StoryListItem = (props: Props) => {
                         />
                     )}
 
-                    {/* {load && <View style={styles.spinnerContainer}>
+                    {load && <View style={styles.spinnerContainer}>
                     <ActivityIndicator size="large" color={'white'} />
-                </View>} */}
+                </View>}
                 </View>
 
                 <View style={{ flexDirection: 'column', flex: 1, }}>
@@ -306,7 +306,7 @@ export const StoryListItem = (props: Props) => {
                             <View style={styles.closeIconContainer}>
                                 {props.customCloseComponent ?
                                     props.customCloseComponent :
-                                    <Text style={{ color: 'white' }}>X</Text>
+                                     <Icon size={22} color='#FFF' name="closecircleo"/>
                                 }
                             </View>
                         </TouchableOpacity>
@@ -361,7 +361,6 @@ export const StoryListItem = (props: Props) => {
 
                     }
                 </TouchableOpacity>
-                </SafeAreaView>
             </GestureRecognizer>
         </KeyboardAvoidingView >
     )

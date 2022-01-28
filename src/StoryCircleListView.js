@@ -11,6 +11,7 @@ class StoryCircleListView extends Component {
     render() {
         const {
             data,
+            storySeen,
             theme,
             handleStoryItemPress,
             unPressedBorderColor,
@@ -34,6 +35,7 @@ class StoryCircleListView extends Component {
                         <StoryCircleListItem
                             avatarSize={avatarSize}
                             index={index}
+                            storySeen={storySeen}
                             theme={theme}
                             handleStoryItemPress={() =>
                                 handleStoryItemPress && handleStoryItemPress(item, index)

@@ -18,7 +18,7 @@ class StoryCircleListItem extends Component {
 
     // Component Functions
     _handleItemPress = item => {
-        const { handleStoryItemPress } = this.props;
+        const { handleStoryItemPress, storySeen } = this.props;
 
         if (handleStoryItemPress) handleStoryItemPress(item);
 
@@ -44,7 +44,7 @@ class StoryCircleListItem extends Component {
                         <TouchableOpacity style={styles.userStoryStyle} onPress={() => item.onPress()}>
                             <Image source={item.storyImage} style={styles.userStoryImage} />
                         </TouchableOpacity>
-                        <Text style={{ color: (theme==='dark') ? '#FFF' : '#000', alignSelf: 'center' }}>{item.user_name.length < 10 ? item.user_name : item.user_name.slice(0, 7) + '...'}</Text>
+                        <Text style={{ color: (theme === 'dark') ? '#FFF' : '#000', alignSelf: 'center' }}>{item.user_name.length < 10 ? item.user_name : item.user_name.slice(0, 7) + '...'}</Text>
 
                     </>
                 }
@@ -83,29 +83,56 @@ class StoryCircleListItem extends Component {
                                     start={{ x: 0, y: 1 }}
                                     end={{ x: 1, y: 0 }}
                                 >
-                                    <Image
-                                        style={{
-                                            height: avatarSize ?? 60,
-                                            width: avatarSize ?? 60,
-                                            borderRadius: 100,
-                                        }}
-                                        source={{ uri: item.user_image}}
-                                        defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
-                                    />
+                                    {item.user_image !== null ?
+                                        <Image
+                                            style={{
+                                                height: avatarSize ?? 60,
+                                                width: avatarSize ?? 60,
+                                                borderRadius: 100,
+                                            }}
+                                            source={{ uri: item.user_image }}
+                                            defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
+                                        />
+                                        :
+                                        <Image
+                                            style={{
+                                                height: avatarSize ?? 60,
+                                                width: avatarSize ?? 60,
+                                                borderRadius: 100,
+                                            }}
+                                            source={require('./assets/images/no_avatar.png')}
+                                            defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
+                                        />
+                                    }
                                 </LinearGradient>
                                 :
-                                <Image
-                                    style={{
-                                        height: avatarSize ?? 60,
-                                        width: avatarSize ?? 60,
-                                        borderRadius: 100,
-                                    }}
-                                    source={{ uri: item.user_image}}
-                                    defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
-                                />
+                                <>
+                                {   
+                                    item.user_image !== null ?
+                                        <Image
+                                            style={{
+                                                height: avatarSize ?? 60,
+                                                width: avatarSize ?? 60,
+                                                borderRadius: 100,
+                                            }}
+                                            source={{ uri: item.user_image }}
+                                            defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
+                                        />
+                                        :
+                                        <Image
+                                            style={{
+                                                height: avatarSize ?? 60,
+                                                width: avatarSize ?? 60,
+                                                borderRadius: 100,
+                                            }}
+                                            source={require('./assets/images/no_avatar.png')}
+                                            defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
+                                        />
+                                    }
+                                    </>
                             }
                         </TouchableOpacity>
-                        <Text style={{ color: (theme==='dark') ? '#FFF' : '#000', alignSelf: 'center' }}>{item.user_name.length < 10 ? item.user_name : item.user_name.slice(0, 7) + '...'}</Text>
+                        <Text style={{ color: (theme === 'dark') ? '#FFF' : '#000', alignSelf: 'center' }}>{item.user_name.length < 10 ? item.user_name : item.user_name.slice(0, 7) + '...'}</Text>
                     </>
                 }
             </View>
