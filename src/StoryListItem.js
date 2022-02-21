@@ -403,6 +403,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingTop: 10,
         paddingHorizontal: 10,
+        marginTop: Platform.OS === 'ios'? 30: 0
     },
     animationBackground: {
         height: 2,
