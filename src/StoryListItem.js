@@ -46,6 +46,8 @@ export const StoryListItem = (props: Props) => {
     const [end, setEnd] = useState(0);
     const [load, setLoad] = useState(true);
     const [pressed, setPressed] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
+    const [duration, setDuration] = useState(false);
     const [showInputBox, setShowInputBox] = useState(false);
     const [content, setContent] = useState(
         stories.map((x) => {
@@ -60,7 +62,7 @@ export const StoryListItem = (props: Props) => {
     const [current, setCurrent] = useState(0);
 
     const prevCurrent = usePrevious(current);
-
+        
     const progress = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -80,11 +82,10 @@ export const StoryListItem = (props: Props) => {
 
     useEffect(() => {
 
-        if(props.isInputBox === true)
-        {
+        if (props.isInputBox === true) {
             resumeAnimationOnSubmit()
         }
-        
+
     }, [props.isInputBox])
 
 
@@ -103,30 +104,29 @@ export const StoryListItem = (props: Props) => {
 
     }, [current]);
 
-    function start() {
+    function start(duration) {
+        setDuration(duration)
         setLoad(false);
         progress.setValue(0);
-        startAnimation();
+        startAnimation(duration);
     }
 
-    function startAnimation() {
+    function startAnimation(duration) {
 
         // console.log('content[current]:::::::::',content[current])
 
         // checking if the data type is video or not
         if (content[current].type == 'video') {
             // type videos
-            if (load) {
                 Animated.timing(progress, {
                     toValue: 1,
-                    duration: 10000, // end,
+                    duration: duration * 1000, // end,
                     useNativeDriver: false,
                 }).start(({ finished }) => {
                     if (finished) {
                         next();
                     }
                 });
-            }
         } else {
             // type image
             Animated.timing(progress, {
@@ -200,11 +200,13 @@ export const StoryListItem = (props: Props) => {
     }
 
     const resumeAnimation = () => {
-        
+        console.log('duration::::::',duration)
+        startAnimation(duration);
         setPressed(false);
-        startAnimation();
         setShowInputBox(false);
+        setIsPaused(false)
         Keyboard.dismiss()
+        console.log('progress::::::', progress)
     }
 
     const resumeAnimationOnSubmit = () => {
@@ -216,6 +218,14 @@ export const StoryListItem = (props: Props) => {
         startAnimation();
         setShowInputBox(false);
         Keyboard.dismiss()
+    }
+
+    const handleStopAnimation = () => {
+
+        progress.stopAnimation()
+        setIsPaused(true)
+        console.log('progress::::::', progress)
+
     }
 
     return (
@@ -242,22 +252,17 @@ export const StoryListItem = (props: Props) => {
 
                     {content[current].type == 'video' ? (
                         <>
-                            {/* <Text style={{color: '#fff'}}>{content[current].image}</Text> */}
+
                             <Video
                                 source={{
-                                    uri: 'https://boppbucket.s3.us-east-2.amazonaws.com/uploads/test-videos/8.mp4',
+                                    uri: content[current].image,
                                 }}
-                                // rate={1.0}
-                                // volume={1.0}
                                 resizeMode="cover"
-                                paused={false}
-                                // positionMillis={0}
-                                onReadyForDisplay={() => start()}
-                                // onPlaybackStatusUpdate={AVPlaybackStatus => {
-                                //     console.log(AVPlaybackStatus);
-                                //     setLoad(AVPlaybackStatus.isLoaded);
-                                //     setEnd(AVPlaybackStatus.durationMillis);
-                                // }}
+                                paused={isPaused}
+                                onLoad={({ duration }) => {
+                                    // console.log('duration::::::', duration)
+                                    start(duration)
+                                }}
                                 style={{ height: height, width: width }}
                             />
                         </>
@@ -270,8 +275,8 @@ export const StoryListItem = (props: Props) => {
                     )}
 
                     {load && <View style={styles.spinnerContainer}>
-                    <ActivityIndicator size="large" color={'white'} />
-                </View>}
+                        <ActivityIndicator size="large" color={'white'} />
+                    </View>}
                 </View>
 
                 <View style={{ flexDirection: 'column', flex: 1, }}>
@@ -306,7 +311,7 @@ export const StoryListItem = (props: Props) => {
                             <View style={styles.closeIconContainer}>
                                 {props.customCloseComponent ?
                                     props.customCloseComponent :
-                                     <Icon size={22} color='#FFF' name="closecircleo"/>
+                                    <Icon size={22} color='#FFF' name="closecircleo" />
                                 }
                             </View>
                         </TouchableOpacity>
@@ -315,7 +320,7 @@ export const StoryListItem = (props: Props) => {
                     <View style={styles.pressContainer}>
 
                         <TouchableWithoutFeedback
-                            onPressIn={() => progress.stopAnimation()}
+                            onPressIn={() => handleStopAnimation()}
                             onLongPress={() => setPressed(true)}
                             onPressOut={() => {
                                 resumeAnimation()
@@ -330,7 +335,7 @@ export const StoryListItem = (props: Props) => {
                         >
                             <View style={{ flex: 1 }} />
                         </TouchableWithoutFeedback>
-                        <TouchableWithoutFeedback onPressIn={() => progress.stopAnimation()}
+                        <TouchableWithoutFeedback onPressIn={() => handleStopAnimation()}
                             onLongPress={() => setPressed(true)}
                             onPressOut={() => {
                                 resumeAnimation()
@@ -401,9 +406,9 @@ const styles = StyleSheet.create({
     },
     animationBarContainer: {
         flexDirection: 'row',
-        paddingTop: 10,
+        paddingTop: Platform.OS === 'ios' ? 40 : 10,
         paddingHorizontal: 10,
-        marginTop: Platform.OS === 'ios'? 30: 0
+        // marginTop: Platform.OS === 'ios' ? 30 : 0
     },
     animationBackground: {
         height: 2,
