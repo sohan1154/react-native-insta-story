@@ -41,12 +41,15 @@ type Props = {
 };
 
 export const StoryListItem = (props: Props) => {
+
     const stories = props.stories;
+    // console.log('stories::::::::::', stories)
 
     const [end, setEnd] = useState(0);
     const [load, setLoad] = useState(true);
     const [pressed, setPressed] = useState(false);
-    const [isPaused, setIsPaused] = useState(false);
+    const [isPaused, setIsPaused] = useState(true); // false
+    const [isMuted, setIsMuted] = useState(true);
     const [duration, setDuration] = useState(false);
     const [showInputBox, setShowInputBox] = useState(false);
     const [content, setContent] = useState(
@@ -62,11 +65,12 @@ export const StoryListItem = (props: Props) => {
     const [current, setCurrent] = useState(0);
 
     const prevCurrent = usePrevious(current);
-        
+
     const progress = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        // console.log('props.currentPage:::', props.currentPage)
+        console.log('props.currentPage:::', props.currentPage)
+        console.log('props.index:::', props.index)
         // console.log('content::::::::::::::', content[0])
 
         setCurrent(0);
@@ -88,20 +92,29 @@ export const StoryListItem = (props: Props) => {
 
     }, [props.isInputBox])
 
+    useEffect(() => {
+
+        console.log('isPaused use effect')
+        if (props.index == props.currentPage && content[current].type == 'video') {
+
+            console.log('isPaused use effect condition matched')
+            // startAnimation();
+        }
+
+    }, [isPaused])
+
 
     useEffect(() => {
         if (!isNullOrWhitespace(prevCurrent)) {
             if (current > prevCurrent && content[current - 1].image == content[current].image) {
-                start();
                 console.log('currentPage:::', props.currentPage)
+                start();
 
             } else if (current < prevCurrent && content[current + 1].image == content[current].image) {
-                start();
                 console.log('currentPage:::', props.currentPage)
-
+                start();
             }
         }
-
     }, [current]);
 
     function start(duration) {
@@ -115,30 +128,52 @@ export const StoryListItem = (props: Props) => {
 
         // console.log('content[current]:::::::::',content[current])
 
-        // checking if the data type is video or not
-        if (content[current].type == 'video') {
-            // type videos
+        // console.log('current--------------->', current)
+        // console.log('content--------------->', content)
+        
+        // checking if the data type is video or image
+        if (props.index == props.currentPage) {
+
+            if (content[current].type == 'video') {
+
+                setIsPaused(false);
+
+                console.log('duration-----:::', duration)
+
+                // type videos
                 Animated.timing(progress, {
                     toValue: 1,
-                    duration: duration * 1000, // end,
+                    // duration: duration * 1000, // end,
+                    duration: end * 1000,
                     useNativeDriver: false,
                 }).start(({ finished }) => {
+
+                    console.log('video-----finished:::', finished)
+                    if (finished) {
+                        next();
+                    }
+                    else if(!finished) {
+
+                        setTimeout(() => {
+                            console.log('Your time is finished')
+                            next()
+                        }, end*1000);
+                    }
+                });
+            } else {
+                // type image
+                Animated.timing(progress, {
+                    toValue: 1,
+                    duration: props.duration,
+                    useNativeDriver: false,
+
+                }).start(({ finished }) => {
+                    console.log('image-----finished::::', finished)
                     if (finished) {
                         next();
                     }
                 });
-        } else {
-            // type image
-            Animated.timing(progress, {
-                toValue: 1,
-                duration: props.duration,
-                useNativeDriver: false,
-
-            }).start(({ finished }) => {
-                if (finished) {
-                    next();
-                }
-            });
+            }
         }
     }
 
@@ -200,13 +235,13 @@ export const StoryListItem = (props: Props) => {
     }
 
     const resumeAnimation = () => {
-        console.log('duration::::::',duration)
+        console.log('duration::::::', duration)
         startAnimation(duration);
         setPressed(false);
         setShowInputBox(false);
         setIsPaused(false)
         Keyboard.dismiss()
-        console.log('progress::::::', progress)
+        // console.log('progress::::::', progress)
     }
 
     const resumeAnimationOnSubmit = () => {
@@ -224,7 +259,7 @@ export const StoryListItem = (props: Props) => {
 
         progress.stopAnimation()
         setIsPaused(true)
-        console.log('progress::::::', progress)
+        // console.log('progress::::::', progress)
 
     }
 
@@ -252,27 +287,35 @@ export const StoryListItem = (props: Props) => {
 
                     {content[current].type == 'video' ? (
                         <>
-
                             <Video
                                 source={{
                                     uri: content[current].image,
                                 }}
                                 resizeMode="cover"
                                 paused={isPaused}
+                                // muted={isMuted}
                                 onLoad={({ duration }) => {
-                                    // console.log('duration::::::', duration)
-                                    start(duration)
+                                    console.log('Video onLoad :::::: and duration is:::', duration)
+
+                                    setEnd(duration);
+
+                                    if (props.index == props.currentPage) {
+                                        start(duration)
+                                    }
                                 }}
                                 style={{ height: height, width: width }}
                             />
                         </>
                     ) : (
 
-                        <Image onLoadEnd={() => start()}
-                            source={{ uri: content[current].image }}
-                            style={styles.image}
-                        />
-                    )}
+                            <Image onLoadEnd={() => {
+                                console.log('Image onLoadEnd ::::::')
+                                start()
+                            }}
+                                source={{ uri: content[current].image }}
+                                style={styles.image}
+                            />
+                        )}
 
                     {load && <View style={styles.spinnerContainer}>
                         <ActivityIndicator size="large" color={'white'} />

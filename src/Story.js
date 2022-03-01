@@ -8,6 +8,7 @@ import { isNullOrWhitespace } from "./helpers/ValidationHelpers";
 import type { IUserStory } from "./interfaces/IUserStory";
 import AndroidCubeEffect from "./AndroidCubeEffect";
 import CubeNavigationHorizontal from "./CubeNavigationHorizontal";
+import { array } from "prop-types";
 
 type Props = {
     data: IUserStory[],
@@ -57,20 +58,33 @@ export const Story = (props: Props) => {
 
     // Component Functions
     const _handleStoryItemPress = (item, index) => {
-        const newData = data.slice(index);
+
+        // const allStories = data.slice(index);
+        let slicedStories = data.slice(1, index); // remove 1st index my-story 
+        let allStories = data.slice(index);
+
+        slicedStories.forEach(element => {
+            allStories.push(element);
+        });
+        
         if (onStart) {
             onStart(item)
         }
         // setStoryIndex(index)
         setCurrentPage(0);
-        setSelectedData(newData);
+        setSelectedData(allStories);
         setIsModalOpen(true);
     };
 
     function onStoryFinish(state) {
         if (!isNullOrWhitespace(state)) {
+
+            let newPage = currentPage;
+
             if (state == "next") {
-                const newPage = currentPage + 1;
+                
+                newPage = currentPage + 1;
+                
                 if (newPage < selectedData.length) {
                     setCurrentPage(newPage);
                     setStorySeen(true)
@@ -84,6 +98,8 @@ export const Story = (props: Props) => {
                     }
                 }
             } else if (state == "previous") {
+
+                newPage = currentPage - 1;
 
                 if (newPage < 0) {
                     setIsModalOpen(false);
@@ -127,6 +143,7 @@ export const Story = (props: Props) => {
                 <CubeNavigationHorizontal
                     ref={cube}
                     callBackAfterSwipe={(x) => {
+                        console.log('callBackAfterSwipe:::::::', currentPage)
                         if (x != currentPage) {
                             setCurrentPage(parseInt(x));
                         }

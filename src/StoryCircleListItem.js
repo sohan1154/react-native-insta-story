@@ -18,6 +18,8 @@ class StoryCircleListItem extends Component {
 
     // Component Functions
     _handleItemPress = item => {
+
+        // console.log('item:::::::', item)
         const { handleStoryItemPress, storySeen } = this.props;
 
         if (handleStoryItemPress) handleStoryItemPress(item);
