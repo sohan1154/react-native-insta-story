@@ -12,6 +12,7 @@ import { array } from "prop-types";
 
 type Props = {
     data: IUserStory[],
+    currentUserId: null,
     style?: any,
     unPressedBorderColor?: string,
     pressedBorderColor?: string,
@@ -21,6 +22,7 @@ type Props = {
     duration?: number,
     theme?: string,
     swipeText?: string,
+    handleDeleteStory?: any,
     customSwipeUpComponent?: any,
     inputBox?: string,
     customKeyboardPopup?: any,
@@ -33,6 +35,7 @@ LogBox.ignoreLogs(['Warning: componentWillReceiveProps']); // Ignore log notific
 export const Story = (props: Props) => {
     const {
         data,
+        currentUserId,
         unPressedBorderColor,
         pressedBorderColor,
         style,
@@ -42,6 +45,7 @@ export const Story = (props: Props) => {
         duration,
         theme,
         swipeText,
+        handleDeleteStory,
         customSwipeUpComponent,
         isInputBox,
         customKeyboardPopup,
@@ -117,12 +121,15 @@ export const Story = (props: Props) => {
             duration={duration * 1000}
             theme={theme}
             key={i}
+            currentUserId={currentUserId}
+            userID={x.user_id}
             profileName={x.user_name}
             profileImage={x.user_image}
             stories={x.stories}
             currentPage={currentPage}
             onFinish={onStoryFinish}
             swipeText={swipeText}
+            handleDeleteStory={handleDeleteStory}
             customSwipeUpComponent={customSwipeUpComponent}
             resetIsInputBox={resetIsInputBox}
             isInputBox={isInputBox}

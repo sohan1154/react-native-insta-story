@@ -11,7 +11,8 @@ import {
     KeyboardAvoidingView,
     View,
     Platform,
-    Keyboard
+    Keyboard,
+    Alert
 } from "react-native";
 import Video from 'react-native-video';
 import type { IUserStoryItem } from "./interfaces/IUserStory";
@@ -25,6 +26,8 @@ import { ScrollView } from 'react-native-gesture-handler';
 const { width, height } = Dimensions.get('window');
 
 type Props = {
+    currentUserId: string,
+    userID: string,
     profileName: string,
     profileImage: string,
     duration?: number,
@@ -33,6 +36,7 @@ type Props = {
     onClosePress: function,
     key: number,
     swipeText?: string,
+    handleDeleteStory?: any,
     customSwipeUpComponent?: any,
     isInputBox: string,
     customKeyboardPopup?: any,
@@ -52,26 +56,32 @@ export const StoryListItem = (props: Props) => {
     const [isMuted, setIsMuted] = useState(true);
     const [duration, setDuration] = useState(false);
     const [showInputBox, setShowInputBox] = useState(false);
+    const [current, setCurrent] = useState(0);
     const [content, setContent] = useState(
         stories.map((x) => {
             return {
+                story_id: x.story_id,
                 image: x.story_image,
                 type: x.type,
                 onPress: x.onPress,
                 finish: 0
             }
-        }));
-
-    const [current, setCurrent] = useState(0);
-
+        })
+    );
     const prevCurrent = usePrevious(current);
-
     const progress = useRef(new Animated.Value(0)).current;
+    let timeOut = null;
 
     useEffect(() => {
         console.log('props.currentPage:::', props.currentPage)
         console.log('props.index:::', props.index)
         // console.log('content::::::::::::::', content[0])
+        console.log('timeOut::::::::::::::', timeOut)
+
+        if (timeOut) {
+            clearTimeout(timeOut);
+            console.log('timeout is cleared')
+        }
 
         setCurrent(0);
         if (props.currentPage != 0) {
@@ -105,6 +115,7 @@ export const StoryListItem = (props: Props) => {
 
 
     useEffect(() => {
+
         if (!isNullOrWhitespace(prevCurrent)) {
             if (current > prevCurrent && content[current - 1].image == content[current].image) {
                 console.log('currentPage:::', props.currentPage)
@@ -130,7 +141,7 @@ export const StoryListItem = (props: Props) => {
 
         // console.log('current--------------->', current)
         // console.log('content--------------->', content)
-        
+
         // checking if the data type is video or image
         if (props.index == props.currentPage) {
 
@@ -138,13 +149,14 @@ export const StoryListItem = (props: Props) => {
 
                 setIsPaused(false);
 
-                console.log('duration-----:::', duration)
+                let videoLenth = (typeof duration !== 'undefined') ? duration : end;
+
+                console.log('Video Lenth is:', videoLenth, ' in duration is:', duration, ' or end is:', end)
 
                 // type videos
                 Animated.timing(progress, {
                     toValue: 1,
-                    // duration: duration * 1000, // end,
-                    duration: end * 1000,
+                    duration: videoLenth * 1000, // duration  // end,
                     useNativeDriver: false,
                 }).start(({ finished }) => {
 
@@ -152,12 +164,16 @@ export const StoryListItem = (props: Props) => {
                     if (finished) {
                         next();
                     }
-                    else if(!finished) {
+                    else if (!finished) {
 
-                        setTimeout(() => {
+                        console.log('set time out is calling...')
+
+                        timeOut = setTimeout(() => {
                             console.log('Your time is finished')
                             next()
-                        }, end*1000);
+                        }, videoLenth * 1000);
+
+                        console.log('timeOut::::::::::::::', timeOut)
                     }
                 });
             } else {
@@ -181,6 +197,47 @@ export const StoryListItem = (props: Props) => {
         progress.stopAnimation();
         setPressed(true);
         setShowInputBox(true);
+    }
+
+    function confirmDeleteBox(storyID) {
+        progress.stopAnimation();
+        setPressed(true);
+
+        Alert.alert(
+            "Are you sure want to Delete?",
+            '',
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => resumeAnimation(),
+                    style: "cancel"
+                },
+                {
+                    text: "OK",
+                    onPress: () => {
+                        updateStories(storyID);
+                        props.handleDeleteStory(storyID);
+                    }
+                }
+            ]
+        );
+    }
+
+    function updateStories(storyID) {
+        let updatedStories = content.filter(item => item.story_id !== storyID);
+        
+        // console.log('updatedStories:::::',updatedStories);
+
+        if(typeof updatedStories !== 'undefined' && updatedStories.length > 0 && typeof updatedStories[current] !== 'undefined') {
+            setContent(updatedStories);
+
+        } else {
+            // setContent(updatedStories);
+            next();
+            // setTimeout(() => {
+            //     setContent(updatedStories);
+            // }, 1000);
+        }
     }
 
     function onSwipeDown() {
@@ -395,20 +452,31 @@ export const StoryListItem = (props: Props) => {
                     </View>
                 </View>
 
-                <TouchableOpacity activeOpacity={1}
-                    onPress={onSwipeUp}
-                    style={styles.swipeUpBtn}
-                >
-                    {showInputBox && props.customSwipeUpComponent ?
-                        props.customSwipeUpComponent :
-
-                        <View style={{ marginTop: s(15) }}>
-                            <Text style={styles.replyText}>^</Text>
-                            <Text style={styles.replyText}>Reply</Text>
+                {props.userID == props.currentUserId ?
+                    <TouchableOpacity activeOpacity={1}
+                        onPress={() => confirmDeleteBox(content[current].story_id)}
+                        style={styles.swipeUpBtn}
+                    >
+                        <View style={{ marginTop: s(28) }}>
+                            <Text style={styles.replyText}>Delete</Text>
                         </View>
+                    </TouchableOpacity>
+                    :
+                    <TouchableOpacity activeOpacity={1}
+                        onPress={onSwipeUp}
+                        style={styles.swipeUpBtn}
+                    >
+                        {showInputBox && props.customSwipeUpComponent ?
 
-                    }
-                </TouchableOpacity>
+                            props.customSwipeUpComponent :
+
+                            <View style={{ marginTop: s(15) }}>
+                                <Text style={styles.replyText}>^</Text>
+                                <Text style={styles.replyText}>Reply</Text>
+                            </View>
+                        }
+                    </TouchableOpacity>
+                }
             </GestureRecognizer>
         </KeyboardAvoidingView >
     )
